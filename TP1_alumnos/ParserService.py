@@ -21,18 +21,25 @@ class Parser:
     @staticmethod
     def LeerArchivo(path):
         
-        with open(path) as fp:
-            fp_reader = csv.DictReader(fp, delimiter = ',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-            monedas = []
-            cuenta = 0
+        try:
+            with open(path) as fp:
             
-            for row in fp_reader:
-                monedas.append(row)
-        
-            monedas_json = json.dumps(monedas)
-        
-            return (monedas_json)
+                fp_reader = csv.DictReader(fp, delimiter = ',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                monedas = []
+                cuenta = 0
+                
+                for row in fp_reader:
+                    monedas.append(row)
+            
+                monedas_json = json.dumps(monedas)
+            
+                return (monedas_json)
+            
+        except FileNotFoundError as e:
+#           raise Exception(e)                            
+            print("error archivo")
+            return 0
+           
             
     @staticmethod            
     def ObtenerPathCSV():
@@ -57,6 +64,7 @@ class Main:
 
     def main(self):
 
+        delay = 10
         
         signal.signal(signal.SIGINT, self.handler_SIGINT)
         
@@ -78,10 +86,22 @@ class Main:
             pathCSV = Parser.ObtenerPathCSV()
             divisas = Parser.LeerArchivo(pathCSV)
             
-            bytesEnviados = self.s.send(bytearray(divisas, 'utf-8'))
-            (data, addr) = self.s.recvfrom(len("OK"))
-                    
-            time.sleep(10)
+            if(divisas == 0):
+                print("Error en la ruta contenida en config.txt")
+                print("Volviendo a intentar en {0} segundos\n".format(delay))
+            else:
+                try:
+                    bytesEnviados = self.s.send(bytearray(divisas, 'utf-8'))
+                    (data, addr) = self.s.recvfrom(len("OK"))
+                except:
+                    print("error en el socket")
+                    print("Volviendo a intentar en {0} segundos\n".format(delay))
+
+                else:
+                    print("datos enviados correctamente por UDP")
+                    print("Volviendo a enviar en {0} segundos\n".format(delay))
+
+            time.sleep(delay)
 
 m = Main()
 m.main()

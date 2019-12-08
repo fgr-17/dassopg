@@ -37,18 +37,24 @@ class Parser:
             
         except FileNotFoundError as e:
 #           raise Exception(e)                            
-            print("error archivo")
+            print("Error en la ruta del archivo guardado en config.txt")
             return 0
            
             
     @staticmethod            
     def ObtenerPathCSV():
-        with open("./config.txt") as fp:
-            path = fp.read()
-            path = path[0:-1]   # saco el \n del final que mete el read()
-            fp.close()
-            return path
+    
+        try:
+            with open("./config.txt") as fp:
+                path = fp.read()
+                path = path[0:-1]   # saco el \n del final que mete el read()
+                fp.close()
+                return path
                 
+        except FileNotFoundError as e:
+            print("No se encontro el archivo de configuracion config.txt")
+            return 0
+
 
 class Main:
     
@@ -84,6 +90,10 @@ class Main:
         while True:
 
             pathCSV = Parser.ObtenerPathCSV()
+            if(pathCSV == 0) :
+                print("Saliendo...")
+                return
+                
             divisas = Parser.LeerArchivo(pathCSV)
             
             if(divisas == 0):

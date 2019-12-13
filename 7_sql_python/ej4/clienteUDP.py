@@ -2,7 +2,11 @@ import requests
 import json
 import os
 import time
+
 from datetime import datetime
+
+import signal
+import socket
 
 class Lampara:
 
@@ -77,18 +81,50 @@ class Lamparas:
         self.RequestDB()
         self.ActualizarJson()    
 
-      
+
+class ServicioUDP:
+
+    def handler_SIGINT(self, sig, frame):  # define the handler  
+        #print("Signal Number:", sig, " Frame: ", frame)  
+        #traceback.print_stack(frame)
+        print("\nSaliendo cliente UDP Lamparas\n")
+        self.s.close()
+        exit()
 
 
+    def __init__(self):
+        self.puerto = 4096
+        signal.signal(signal.SIGINT, self.handler_SIGINT)
 
+
+    def Enviar(self, ip, trama):
+    
+        self.ip = ip
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.s.connect((self.ip, self.puerto))
+            # print("Conectado a " + str(self.ip) + ":"+ str(self.puerto))
+            self.s.send(bytearray(trama, 'utf-8'))
+            self.s.close()
+        except:
+            print("No se pudo conectar a" + str(self.ip) + ":"+ str(self.puerto))
+            return
+            
+    def EnviarVariaciones(self, lamparas):
+        
+        for lampara in lamparas:
+            if (lampara.flagCambio == True):
+                lampara.flagCambio = False
+                if lampara.status == 0:
+                    self.Enviar(lampara.ip, ">ST:OFF\n")
+                else:
+                    self.Enviar(lampara.ip, ">ST:ON\n")
+            
 
 print("Cliente UDP Lamparas")
-
-
-    
-    
 l = Lamparas("http://localhost:5000")    
 l.MostrarLamparas()
+sudp = ServicioUDP()
     
 
 while True:
@@ -96,4 +132,5 @@ while True:
     time.sleep(1.5)
 
     l.ActualizarLamparasDB()
+    sudp.EnviarVariaciones(l.lamparas)
     l.MostrarLamparas()    

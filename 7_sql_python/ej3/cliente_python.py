@@ -20,6 +20,7 @@ while True:
             print(r.text)
         else:
             print("error code:"+str(r.status_code))
+        input("\n\nPresione Enter para seguir")
 
     elif op==2:
         id_lamp = input("Ingrese ID de lampara:")
@@ -30,7 +31,8 @@ while True:
             print(r.text)
         else:
             print("error code:"+str(r.status_code))
-
+        input("\n\nPresione Enter para seguir")
+        
     elif op==3:
         page = input("Ingrese numero de pagina:")
         size = input("Ingrese size de pagina:")
@@ -40,6 +42,11 @@ while True:
             print(r.text)
         else:
             print("error code:"+str(r.status_code))
-
+        input("\n\nPresione Enter para seguir")
+        
     elif op==4:
+        input("\n\nPresione Enter para seguir")
         break
+        
+    else:
+        input("\n\nPresione Enter para seguir")
